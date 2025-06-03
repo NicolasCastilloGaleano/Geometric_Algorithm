@@ -1,3 +1,6 @@
+src/.samples/N22A.csv
+src/.samples/N20A.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
