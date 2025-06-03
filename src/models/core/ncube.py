@@ -72,10 +72,11 @@ class NCube:
         """
         numero_dims = self.dims.size
         seleccion = [slice(None)] * numero_dims
-
+        print(indices_condicionados)
         for condicion in indices_condicionados:
             level_arr = numero_dims - (condicion + 1)
             seleccion[level_arr] = estado_inicial[condicion]
+        print(tuple(seleccion))
 
         nuevas_dims = np.array(
             [dim for dim in self.dims if dim not in indices_condicionados],
@@ -113,6 +114,11 @@ class NCube:
                 [1. 1.]],
                 [[1. 1.]
                 [1. 1.]]]
+                
+                [[0.5 0.5]
+                [1. 1.]]
+
+                [0.75 0.75]
 
             >>> mi_ncubo.marginalizar(dimensiones)
             NCube(index=0):
