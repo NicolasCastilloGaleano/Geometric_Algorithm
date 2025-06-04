@@ -46,6 +46,7 @@ class GeometricSIA(SIA):
         condicion: str,
         alcance: str,
         mecanismo: str,
+        tpm: np.ndarray #! COMENTAR PARA UN SOLO ESTADO INICIAL
     ):
         """ vamos a hacer que vaya desde el estado inicial hasta el final, bit a bit diferente, llenando la tabla primero para distancias hamming 1 hasta n, con n la cantidad de bits que cambian del estado inicial al final. para esto podemos usar una tabla de transiciones, donde cada fila es un estado y cada columna es un bit. la tabla de transiciones se llena con los estados que se pueden alcanzar desde el estado inicial, y luego se va llenando la tabla de distancias hamming. para esto vamos a usar una lista de listas, donde cada lista es una fila de la tabla de transiciones. la primera fila es el estado inicial, y las siguientes filas son los estados alcanzables desde el estado inicial. la última fila es el estado final.
         paso a paso
@@ -59,7 +60,9 @@ class GeometricSIA(SIA):
 
         nota: intentar llenar la tabla desde el estado final hacia atras, pues al contrario habra dependencia de los valores de la tabla de los estados que van en camino hacia el estado final
         """
-        self.sia_preparar_subsistema(condicion, alcance, mecanismo)
+        self.sia_preparar_subsistema(condicion, alcance, mecanismo, tpm) #! COMENTAR PARA UN SOLO ESTADO INICIAL
+        # self.sia_preparar_subsistema(condicion, alcance, mecanismo) #! DESCOMENTAR PARA UN SOLO ESTADO INICIAL
+
         futuro = tuple(
             (EFECTO, efecto) for efecto in self.sia_subsistema.indices_ncubos
         )
@@ -80,7 +83,7 @@ class GeometricSIA(SIA):
         self.estado_inicial = self.sia_subsistema.estado_inicial[dims]
         self.estado_final = 1 - self.estado_inicial
         mip = self.find_mip()
-        print(mip)
+        # print(mip)
         fmt_mip = fmt_biparte_q(list(mip), self.nodes_complement(mip))
 
         return Solution(
@@ -116,7 +119,7 @@ class GeometricSIA(SIA):
             emd = emd_efecto(dist, self.sia_dists_marginales)
             key = [(0,nodo) for nodo in presentes]
             key.extend([(1,nodo) for nodo in futuros])
-            print(fmt_biparte_q(list(key), self.nodes_complement(key)))
+            # print(fmt_biparte_q(list(key), self.nodes_complement(key)))
             self.memoria_particiones[tuple(key)] = (emd, dist)
         return min(
             self.memoria_particiones, key=lambda k: self.memoria_particiones[k][0]
@@ -170,8 +173,7 @@ class GeometricSIA(SIA):
         self.tabla_transiciones[key] = diffs.tolist()
         # for idx in ncubos:
         #     self.tabla_transiciones[key][idx] = (abs(self.sia_subsistema.ncubos[idx].data[index_inicial]-self.sia_subsistema.ncubos[idx].data[index_final]))
-        if self.tabla_transiciones[key] != diffs.tolist():
-            print("falso")
+        
         if distancia_hamming > 1:
             for i in range(len(estado_inicial)):
                 if estado_inicial[i] != estado_final[i]:
@@ -194,12 +196,12 @@ class GeometricSIA(SIA):
         Identifica las particiones óptimas basadas en los costos de transición
         y las distancias Hamming entre los estados.
         """
-        idx_nivel_cero = 0
-        idx_nivel_cero_2 = 1
-        costo=1e5
+        # idx_nivel_cero = 0
+        # idx_nivel_cero_2 = 1
+        # costo=1e5
         key = tuple(self.caminos[0][0]), tuple(self.estado_final)
         costos: list = self.tabla_transiciones[key]
-        print(f"costos nivel cero {costos}")
+        # print(f"costos nivel cero {costos}")
         # for idx, valor in enumerate(costos):
         #     if valor < costo:
         #         costo = valor
@@ -207,11 +209,11 @@ class GeometricSIA(SIA):
         # presentes_nivel_cero = [i for i in range(len(self.estado_final))]
         # furutros_nivel_cero = [i for i in range(len(self.sia_subsistema.indices_ncubos)) if i != idx_nivel_cero]
         # candidatos = [[presentes_nivel_cero, furutros_nivel_cero]]
-        pares = [(valor, idx) for idx, valor in enumerate(costos)]
-        menores = heapq.nsmallest(3, pares, key=lambda x: x[0])
+        # pares = [(valor, idx) for idx, valor in enumerate(costos)]
+        # menores = heapq.nsmallest(len(self.estado_inicial), pares, key=lambda x: x[0])
         candidatos = []
         n_vars = len(costos)
-        for _,idx in menores:
+        for idx in range(n_vars):
             presentes = [i for i in range(len(self.estado_final))]
             futuros = [i for i in range(n_vars) if i != idx]
             candidatos.append([presentes, futuros])
@@ -226,19 +228,19 @@ class GeometricSIA(SIA):
         #     [presentes_1, futuros_1],
         #     [presentes_2, futuros_2]
         # ]
-        print(f"candidatos nivel cero {candidatos}")
+        # print(f"candidatos nivel cero {candidatos}")
         es_par = len(self.caminos) % 2 == 0
         if es_par:
             mitad = len(self.caminos) // 2
         else:
-            mitad = (len(self.caminos) // 2) +1
+            mitad = (len(self.caminos) // 2) + 1
         for nivel in range(1,mitad):
-            candidato_nivel = self.caminos[nivel][0]
+            # candidato_nivel = self.caminos[nivel][0]
             costo_candidato_nivel = 1e5
             presentes_nivel = []
             futuros_nivel = []
             for estado in self.caminos[nivel]:
-                candidato = estado
+                # candidato = estado
                 costo_candidato = 0
                 presentes = []
                 futuros = []
@@ -255,7 +257,7 @@ class GeometricSIA(SIA):
                     else:
                         costo_candidato += complementario[idx]
                 if costo_candidato < costo_candidato_nivel:
-                    candidato_nivel = candidato
+                    # candidato_nivel = candidato
                     costo_candidato_nivel = costo_candidato
                     presentes_nivel = presentes
                     futuros_nivel = futuros

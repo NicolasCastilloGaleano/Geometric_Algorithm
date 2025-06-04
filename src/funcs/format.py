@@ -21,8 +21,8 @@ def fmt_biparticion(
     width_dual = max(len(purv_dual), len(mech_dual)) + 2
 
     return (
-        f"⎛{purv_prim:^{width_prim}}⎞⎛{purv_dual:^{width_dual}}⎞\n"
-        f"⎝{mech_prim:^{width_prim}}⎠⎝{mech_dual:^{width_dual}}⎠\n"
+        f"|{purv_prim:^{width_prim}}||{purv_dual:^{width_dual}}|\n"
+        f"|{mech_prim:^{width_prim}}||{mech_dual:^{width_dual}}|\n"
     )
 
 
@@ -34,7 +34,7 @@ def fmt_biparte_q(
     top_prim, bottom_prim = fmt_parte_q(prim, to_sort)
     top_dual, bottom_dual = fmt_parte_q(dual, to_sort)
 
-    return f"{top_prim}{top_dual}\n{bottom_prim}{bottom_dual}\n"
+    return f"{top_prim}{top_dual}\n{bottom_prim}{bottom_dual}"
 
 
 def fmt_parte_q(parte: list[tuple[int, int]], to_sort: bool = True) -> tuple[str, str]:
@@ -50,4 +50,4 @@ def fmt_parte_q(parte: list[tuple[int, int]], to_sort: bool = True) -> tuple[str
     str_mech = ",".join(mech) if mech else VOID_STR
     width = max(len(str_purv), len(str_mech)) + 2
 
-    return f"⎛{str_purv:^{width}}⎞", f"⎝{str_mech:^{width}}⎠"
+    return f"|{str_purv:^{width}}|", f"|{str_mech:^{width}}|"

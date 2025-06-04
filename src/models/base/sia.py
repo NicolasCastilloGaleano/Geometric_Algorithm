@@ -58,6 +58,7 @@ class SIA(ABC):
         condicion: str,
         alcance: str,
         mecanismo: str,
+        tpm: np.ndarray #! COMENTAR PARA UN SOLO ESTADO INICIAL
     ):
         """Es en este método donde dada la entrada del usuario, vamos a generar un sistema completo, aplicamos condiciones de fondo (background conditions), loe substraemos partes para dejar un subsistema y es este el que retornamos pues este es el mínimo "sistema" útil para poder encontrar la bipartición que le genere la menor pérdida.
 
@@ -86,7 +87,7 @@ class SIA(ABC):
         self.sia_gestor.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Cargar y preparar datos
-        tpm = self.sia_cargar_tpm()
+        # tpm = self.sia_cargar_tpm() #! DESCOMENTAR PARA UN SOLO ESTADO INICIAL
         estado_inicial = np.array(
             [canal for canal in self.sia_gestor.estado_inicial], dtype=np.int8
         )
