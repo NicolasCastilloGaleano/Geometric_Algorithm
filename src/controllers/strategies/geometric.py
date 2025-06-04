@@ -1,3 +1,4 @@
+import heapq
 from src.constants.error import ERROR_INCOMPATIBLE_SIZES
 from src.models.core.system import System
 from src.constants.base import NET_LABEL, STR_ZERO
@@ -79,6 +80,7 @@ class GeometricSIA(SIA):
         self.estado_inicial = self.sia_subsistema.estado_inicial[dims]
         self.estado_final = 1 - self.estado_inicial
         mip = self.find_mip()
+        print(mip)
         fmt_mip = fmt_biparte_q(list(mip), self.nodes_complement(mip))
 
         return Solution(
@@ -114,6 +116,7 @@ class GeometricSIA(SIA):
             emd = emd_efecto(dist, self.sia_dists_marginales)
             key = [(0,nodo) for nodo in presentes]
             key.extend([(1,nodo) for nodo in futuros])
+            print(fmt_biparte_q(list(key), self.nodes_complement(key)))
             self.memoria_particiones[tuple(key)] = (emd, dist)
         return min(
             self.memoria_particiones, key=lambda k: self.memoria_particiones[k][0]
@@ -192,16 +195,38 @@ class GeometricSIA(SIA):
         y las distancias Hamming entre los estados.
         """
         idx_nivel_cero = 0
+        idx_nivel_cero_2 = 1
         costo=1e5
         key = tuple(self.caminos[0][0]), tuple(self.estado_final)
         costos: list = self.tabla_transiciones[key]
-        for idx, valor in enumerate(costos):
-            if valor < costo:
-                costo = valor
-                idx_nivel_cero = idx
-        presentes_nivel_cero = [i for i in range(len(self.estado_final))]
-        furutros_nivel_cero = [i for i in range(len(self.sia_subsistema.indices_ncubos)) if i != idx_nivel_cero]
-        candidatos = [[presentes_nivel_cero, furutros_nivel_cero]]
+        print(f"costos nivel cero {costos}")
+        # for idx, valor in enumerate(costos):
+        #     if valor < costo:
+        #         costo = valor
+        #         idx_nivel_cero = idx
+        # presentes_nivel_cero = [i for i in range(len(self.estado_final))]
+        # furutros_nivel_cero = [i for i in range(len(self.sia_subsistema.indices_ncubos)) if i != idx_nivel_cero]
+        # candidatos = [[presentes_nivel_cero, furutros_nivel_cero]]
+        pares = [(valor, idx) for idx, valor in enumerate(costos)]
+        menores = heapq.nsmallest(3, pares, key=lambda x: x[0])
+        candidatos = []
+        n_vars = len(costos)
+        for _,idx in menores:
+            presentes = [i for i in range(len(self.estado_final))]
+            futuros = [i for i in range(n_vars) if i != idx]
+            candidatos.append([presentes, futuros])
+        # _, idx_nivel_cero_1 = dos_menores[0]
+        # _, idx_nivel_cero_2 = dos_menores[1]
+        # print(idx_nivel_cero_1, idx_nivel_cero_2)
+        # presentes_1 = [i for i in range(n_vars)]
+        # futuros_1  = [i for i in range(n_vars) if i != idx_nivel_cero_1]
+        # presentes_2 = [i for i in range(n_vars)]
+        # futuros_2  = [i for i in range(n_vars) if i != idx_nivel_cero_2]
+        # candidatos = [
+        #     [presentes_1, futuros_1],
+        #     [presentes_2, futuros_2]
+        # ]
+        print(f"candidatos nivel cero {candidatos}")
         es_par = len(self.caminos) % 2 == 0
         if es_par:
             mitad = len(self.caminos) // 2
